@@ -1,0 +1,135 @@
+#!/usr/bin/python3
+# coding: utf-8
+import hashlib, sys, string
+# Banner e menu de Ajuda
+def banner():
+    print(""" _   _           _     _           __        __            _
+| | | | __ _ ___| |__ (_)_ __   __ \ \      / /__  _ __ __| |
+| |_| |/ _` / __| '_ \| | '_ \ / _` \ \ /\ / / _ \| '__/ _` |
+|  _  | (_| \__ \ | | | | | | | (_| |\ V  V / (_) | | | (_| |
+|_| |_|\__,_|___/_| |_|_|_| |_|\__, | \_/\_/ \___/|_|  \__,_|
+                               |___/
+    """)
+def ajuda():
+    print("HashingWord, hash your words with:")
+    print("""->md5 ->sha1 ->sha224 ->sha256 ->sha384
+->sha512 ->sha3_224 ->sha3_256 ->sha3_384 ->sha3_512""")
+    print("Parâmetros de uso:")
+    print("\t-s || --single: criptografa apenas a palavra informada")
+    print("\t\tpython hashing md5 --single 'João roubou pão'")
+    print("\t\tpython hashing sha3_256 -s 'Na casa do João'")
+    print("\t-m || --mults: processo recursivo de criptografia para seus inputs")
+    print("\t\tpython hashing sha224 -m")
+    print("\t\tpython hashing sha512 --mults")
+    print("\t-w || --wordlist: criptografa todas as linhas de uma wordlist")
+    print("\t\tpython hashing sha3_224 -w")
+    print("\t\tpython hashing sha3_384 --wordlist")
+    print("*As flags -w/--wordlist e -m/--mults geram um arquivo temporário")
+    print("*em /tmp, nome: hashing_log")
+    print("\nUso geral: python hashing [tipohash] [opcao] [path ou palavra]")
+#########################################################################
+hashativa = ["hashlib.md5", "hashlib.sha1", "hashlib.sha224", "hashlib.sha256",
+"hashlib.sha384", "hashlib.sha512","hashlib.sha3_224",
+"hashlib.sha3_256", "hashlib.sha3_384", "hashlib.sha3_512"]
+
+argsativos = ["-w", "--wordlist", "--single", "-s", "-m", "--mults"]
+# chamada de funções para gerar hash
+
+def chamahash(wtf,var):
+    if wtf == "hashlib.md5":
+        HASH = hashlib.md5(str.encode(var)).hexdigest()
+    elif wtf == "hashlib.sha512":
+        HASH = hashlib.sha512(str.encode(var)).hexdigest()
+    elif wtf == "hashlib.sha256":
+        HASH = hashlib.sha256(str.encode(var)).hexdigest()
+    elif wtf == "hashlib.sha1":
+        HASH = hashlib.sha1(str.encode(var)).hexdigest()
+    elif wtf == "hashlib.sha224":
+        HASH = hashlib.sha224(str.encode(var)).hexdigest()
+    elif wtf == "hashlib.sha384":
+        HASH = hashlib.sha384(str.encode(var)).hexdigest()
+    elif wtf == "hashlib.sha3_256":
+        HASH = hashlib.sha3_256(str.encode(var)).hexdigest()
+    elif wtf == "hashlib.sha3_512":
+        HASH = hashlib.sha3_512(str.encode(var)).hexdigest()
+    elif wtf == "hashlib.sha3_384":
+        HASH = hashlib.sha3_384(str.encode(var)).hexdigest()
+    elif wtf == "hashlib.sha3_224":
+        HASH = hashlib.sha3_224(str.encode(var)).hexdigest()
+    return HASH
+#########################################################################
+# Função para leitura de arquivo e adição em variável
+def abre_arquivo(path,cripto,opt):
+    contador = 0
+    arqhash = open("/tmp/hashing_log",'w')
+    loghash = []
+    if opt == "wordlist":
+        arq = open(path, 'r')
+        texto = arq.readlines()
+        for linha in texto:
+            var = chamahash(cripto,linha)
+            loghash.append(var)
+            loghash.append("\n")
+            print(contador,"-",var)
+            contador += 1
+        arq.close()
+        arqhash.writelines(loghash)
+        arqhash.close()
+    else:
+        print ("*Informe um espaço vazio para encerrar o loop")
+        print ("Informe suas palavras em '>_'")
+        linha=0
+        while linha != " ":
+            linha = input(">_ ")
+            var = chamahash(cripto,linha)
+            if linha == " ":
+                break
+            loghash.append(var)
+            loghash.append("\n")
+            print(contador,"-",var)
+            contador += 1
+        arqhash.writelines(loghash)
+        arqhash.close()
+#########################################################################
+# Rotina principal do programa
+if len(sys.argv) == 1:
+    banner()
+    ajuda()
+    exit()
+# Variáveis que recebem argumentos do sistema
+wtf = 'hashlib.%s' % sys.argv[1]
+wtf = wtf.lower()
+interacao = sys.argv[2]
+#########################################################################
+
+if wtf not in hashativa or wtf == "help" or wtf == "--help" or wtf == "-h":
+    banner()
+    ajuda()
+    print("Tipo de Hash não está presente em Hashlib...",wtf)
+    exit()
+banner()
+if interacao not in argsativos:
+    print("Este argumento não é válido...")
+    baner()
+    ajuda()
+    exit()
+if interacao == "-s" or interacao == "--single":
+    var = sys.argv[3:len(sys.argv)]
+    text = " ".join(var)
+    var = chamahash(wtf,' '.join(var))
+    print(text,"=",var)
+    exit()
+raiz_arquivo = ""
+# Caso a opção não seja single
+if interacao == "-m" or interacao == "--mults":
+    opcao = "interativo"
+    abre_arquivo(raiz_arquivo,wtf,opcao)
+
+elif interacao == "-w" or interacao == "--wordlist":
+    raiz_arquivo = sys.argv[3]
+    var = sys.argv[4:len(sys.argv)]
+    opcao = "wordlist"
+    abre_arquivo(raiz_arquivo,wtf,opcao)
+else:
+    print ("Parâmetros não reconhecidos...")
+    exit()
